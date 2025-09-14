@@ -1,0 +1,136 @@
+{
+  "roleConfig": {
+    "admin": {
+      "sections": ["dashboard", "admin", "bookings", "reports", "analytics"],
+      "features": [
+        "manageCounsellors",
+        "manageStudents",
+        "viewAllBookings",
+        "generateReports",
+        "systemSettings",
+        "emergencyAlerts",
+        "analyticsAccess",
+        "userManagement",
+        "systemLogs",
+        "institutionManagement",
+        "auditTrails"
+      ],
+      "dashboard": {
+        "widgets": [
+          "totalUsers",
+          "activeSessions",
+          "emergencyCases",
+          "systemHealth",
+          "counsellorPerformance",
+          "studentEngagement"
+        ]
+      }
+    },
+    "counsellor": {
+      "sections": ["dashboard", "appointments", "patients", "reports", "schedule"],
+      "features": [
+        "viewAppointments",
+        "patientHistory",
+        "manageAvailability",
+        "generateReports",
+        "emergencyResponses",
+        "sessionNotes",
+        "prescribeActivities",
+        "viewAnalytics",
+        "messagePatients",
+        "scheduleFollowups"
+      ],
+      "dashboard": {
+        "widgets": [
+          "todayAppointments",
+          "patientProgress",
+          "urgentCases",
+          "upcomingSessions",
+          "recentNotes",
+          "patientFeedback"
+        ]
+      }
+    },
+    "student": {
+      "sections": ["dashboard", "assessment", "wellness", "bookings", "reports", "resources"],
+      "features": [
+        "takeAssessment",
+        "bookAppointment",
+        "viewProgress",
+        "accessWellness",
+        "viewPersonalReports",
+        "moodTracking",
+        "journaling",
+        "meditationAccess",
+        "peerSupport",
+        "resourceLibrary",
+        "emergencyContacts",
+        "appointmentHistory"
+      ],
+      "dashboard": {
+        "widgets": [
+          "moodTracker",
+          "upcomingSession",
+          "wellnessScore",
+          "dailyTips",
+          "progressGraph",
+          "achievements"
+        ]
+      }
+    }
+  },
+  "emergency": {
+    "contacts": [
+      {
+        "name": "PSG Hospitals Mental Health",
+        "number": "+91 422 2570170",
+        "description": "24/7 Mental Health Support - PSG Hospitals, Coimbatore"
+      },
+      {
+        "name": "Sri Ramakrishna Hospital",
+        "number": "+91 422 4500000",
+        "description": "Mental Health Emergency Support - Coimbatore"
+      },
+      {
+        "name": "Kovai Medical Center",
+        "number": "+91 422 4323000",
+        "description": "24/7 Crisis Support - KMCH, Coimbatore"
+      },
+      {
+        "name": "Government Hospital Coimbatore",
+        "number": "+91 422 2301393",
+        "description": "Government Mental Health Services"
+      },
+      {
+        "name": "NIMHANS Helpline",
+        "number": "080-46110007",
+        "description": "National Mental Health Support"
+      },
+      {
+        "name": "Vandrevala Foundation",
+        "number": "1860-2662-345",
+        "description": "24/7 Crisis Helpline"
+      },
+      {
+        "name": "Police Emergency - Coimbatore",
+        "number": "100",
+        "description": "Local Police Emergency"
+      },
+      {
+        "name": "Ambulance - Tamil Nadu",
+        "number": "108",
+        "description": "Emergency Medical Services"
+      },
+      {
+        "name": "Fire Service - Coimbatore",
+        "number": "101",
+        "description": "Fire Emergency"
+      },
+      {
+        "name": "Women Helpline - Tamil Nadu",
+        "number": "1091",
+        "description": "Women Safety & Support"
+      }
+    ]
+  }
+}
