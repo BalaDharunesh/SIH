@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DigiMind - Digital Psychological Intervention</title>
     <link rel="stylesheet" href="style.css">
+    <script src="utils.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -23,8 +24,48 @@
         </div>
     </header>
 
-    <!-- SOS Floating Button -->
+    <!-- SOS Floating Button and Modal -->
     <button class="sos-btn" onclick="openSOS()" title="Emergency Help">🆘</button>
+    
+    <!-- SOS Modal -->
+    <div id="sosModal" class="modal">
+        <div class="modal-content">
+            <h2>Emergency Support Numbers 🚨</h2>
+            <div class="sos-numbers">
+                <div class="sos-group">
+                    <h3>Mental Health Helplines - Coimbatore</h3>
+                    <ul>
+                        <li><strong>PSG Mental Health Support:</strong> 0422-2570170</li>
+                        <li><strong>Kovai Medical Center:</strong> 0422-4323000</li>
+                        <li><strong>Sri Ramakrishna Hospital:</strong> 0422-4500000</li>
+                    </ul>
+                </div>
+                
+                <div class="sos-group">
+                    <h3>24/7 Crisis Helplines</h3>
+                    <ul>
+                        <li><strong>NIMHANS:</strong> 080-46110007</li>
+                        <li><strong>National Mental Health Helpline:</strong> 1800-599-0019</li>
+                        <li><strong>Vandrevala Foundation:</strong> 1860-2662-345</li>
+                    </ul>
+                </div>
+
+                <div class="sos-group">
+                    <h3>General Emergency</h3>
+                    <ul>
+                        <li><strong>Police:</strong> 100</li>
+                        <li><strong>Ambulance:</strong> 108</li>
+                        <li><strong>Fire Service:</strong> 101</li>
+                    </ul>
+                </div>
+
+                <p class="emergency-note">
+                    If you're experiencing a life-threatening emergency, please call 108 or visit the nearest hospital immediately.
+                </p>
+            </div>
+            <button class="btn btn-primary" onclick="closeSOSModal()">Close</button>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main">
@@ -70,7 +111,55 @@
                     <h2 id="welcomeMessage">Welcome back! 🌈</h2>
                     <p id="streakCounter">Daily streak: 0 days 🔥</p>
                 </div>
+                <div class="dashboard-content">
+                    <!-- Role-specific content will be loaded here -->
+                </div>
+            </div>
+        </section>
 
+        <!-- Admin Section -->
+        <section id="admin" class="section">
+            <div class="container">
+                <h2>Admin Dashboard 👨‍💼</h2>
+                <div class="admin-panel">
+                    <div class="admin-nav">
+                        <button class="admin-nav-btn active" onclick="showAdminTab('counsellors')">Manage Counsellors</button>
+                        <button class="admin-nav-btn" onclick="showAdminTab('students')">Manage Students</button>
+                        <button class="admin-nav-btn" onclick="showAdminTab('bookings')">All Bookings</button>
+                        <button class="admin-nav-btn" onclick="showAdminTab('reports')">System Reports</button>
+                    </div>
+                    <div class="admin-content" id="adminContent">
+                        <!-- Admin content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Counsellor Section -->
+        <section id="counsellor" class="section">
+            <div class="container">
+                <h2>Counsellor Dashboard 👨‍⚕️</h2>
+                <div class="counsellor-panel">
+                    <div class="appointments-section">
+                        <h3>Today's Appointments</h3>
+                        <div id="todayAppointments">
+                            <!-- Appointments will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="patients-section">
+                        <h3>Patient Overview</h3>
+                        <div id="patientOverview">
+                            <!-- Patient stats will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Dashboard -->
+        <section id="student" class="section">
+            <div class="container">
+                <h2>Student Dashboard 👨‍🎓</h2>
                 <!-- Mood Check-in -->
                 <div class="card mood-card">
                     <h3>How are you feeling today? 😊</h3>
@@ -83,27 +172,27 @@
                     <p id="moodStatus"></p>
                 </div>
 
-                <!-- Badges -->
-                <div class="card badges-card">
-                    <h3>Your Achievements 🏆</h3>
-                    <div class="badges-container" id="badgesContainer">
-                        <!-- Badges will be populated by JavaScript -->
+                <!-- Progress Section -->
+                <div class="card progress-card">
+                    <h3>Your Progress 📈</h3>
+                    <div id="studentProgress">
+                        <!-- Progress will be loaded here -->
                     </div>
                 </div>
 
-                <!-- Quick Links -->
+                <!-- Quick Actions -->
                 <div class="quick-links">
                     <button class="quick-link-btn" onclick="showSection('assessment')">
-                        📋 Self-Assessment
+                        📋 Take Assessment
                     </button>
                     <button class="quick-link-btn" onclick="showSection('wellness')">
-                        🌱 Wellness Hub
+                        🌱 Wellness Activities
                     </button>
                     <button class="quick-link-btn" onclick="showSection('bookings')">
-                        📅 Book Session
+                        📅 Book Counselling
                     </button>
                     <button class="quick-link-btn" onclick="showSection('reports')">
-                        📊 View Reports
+                        📊 My Reports
                     </button>
                 </div>
             </div>
