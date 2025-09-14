@@ -4,18 +4,125 @@ let currentUser = null;
 let isLoginMode = true;
 let breathingInterval = null;
 let sosBreathingInterval = null;
+let uiConfig = null;
+
+// Load UI Configuration
+async function loadUIConfig() {
+    try {
+        const response = await fetch('data/ui-config.json');
+        uiConfig = await response.json();
+    } catch (error) {
+        console.error('Error loading UI config:', error);
+    }
+}
+
+// Load wellness resources
+async function loadWellnessHub() {
+    try {
+        const response = await fetch('data/wellness.json');
+        const wellnessData = await response.json();
+        
+        // Update breathing exercises section
+        const breathingSection = document.getElementById('breathingExercises');
+        if (breathingSection) {
+            breathingSection.innerHTML = wellnessData.breathing_exercises.map(exercise => `
+                <div class="exercise-card">
+                    <h3>${exercise.name}</h3>
+                    <p>${exercise.description}</p>
+                    <p class="difficulty">Level: ${exercise.difficulty}</p>
+                    <p class="duration">Duration: ${exercise.duration}s</p>
+                    <div class="benefits">
+                        ${exercise.benefits.map(benefit => `<span class="benefit-tag">${benefit}</span>`).join('')}
+                    </div>
+                    <button onclick="startBreathingExercise('${exercise.id}')">Start Exercise</button>
+                </div>
+            `).join('');
+        }
+
+        // Update music suggestions
+        const musicSection = document.getElementById('musicSuggestions');
+        if (musicSection) {
+            musicSection.innerHTML = wellnessData.music_suggestions.map(track => `
+                <div class="music-card">
+                    <h3>${track.title}</h3>
+                    <p class="artist">${track.artist}</p>
+                    <p class="genre">${track.genre}</p>
+                    <p class="duration">${track.duration}</p>
+                    <p class="mood">Mood: ${track.mood}</p>
+                    <p class="description">${track.description}</p>
+                    <button onclick="playMusic('${track.id}')">Play</button>
+                </div>
+            `).join('');
+        }
+
+        // Update journal prompts
+        const journalSection = document.getElementById('journalPrompts');
+        if (journalSection) {
+            journalSection.innerHTML = wellnessData.journal_prompts.map(prompt => `
+                <div class="prompt-card">
+                    <p class="prompt-text">${prompt.prompt}</p>
+                    <p class="category">Category: ${prompt.category}</p>
+                    <p class="difficulty">Difficulty: ${prompt.difficulty}</p>
+                    <button onclick="startJournaling('${prompt.id}')">Write Now</button>
+                </div>
+            `).join('');
+        }
+
+        // Update mindfulness activities
+        const mindfulnessSection = document.getElementById('mindfulnessActivities');
+        if (mindfulnessSection) {
+            mindfulnessSection.innerHTML = wellnessData.mindfulness_activities.map(activity => `
+                <div class="activity-card">
+                    <h3>${activity.name}</h3>
+                    <p>${activity.description}</p>
+                    <p class="duration">Duration: ${activity.duration}s</p>
+                    <p class="category">Type: ${activity.category}</p>
+                    <div class="instructions">
+                        ${activity.instructions.map((step, index) => 
+                            `<p class="step"><span>${index + 1}.</span> ${step}</p>`
+                        ).join('')}
+                    </div>
+                    <button onclick="startActivity('${activity.id}')">Begin Practice</button>
+                </div>
+            `).join('');
+        }
+
+        // Update wellness tips
+        const tipsSection = document.getElementById('wellnessTips');
+        if (tipsSection) {
+            tipsSection.innerHTML = wellnessData.wellness_tips.map(tip => `
+                <div class="tip-card">
+                    <p class="tip-text">${tip.tip}</p>
+                    <p class="category">Category: ${tip.category}</p>
+                    <p class="difficulty">Difficulty: ${tip.difficulty}</p>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading wellness data:', error);
+    }
+}
 
 // Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+document.addEventListener('DOMContentLoaded', () => {
+    withErrorBoundary(async () => {
+        await initializeApp();
+        await setupSOSModal();
+    }, 'app')();
 });
 
 // Initialize the application
-function initializeApp() {
-    checkAuthStatus();
-    loadMockData();
-    setupEventListeners();
-    updateDateTime();
+async function initializeApp() {
+    try {
+        await loadUIConfig();
+        checkAuthStatus();
+        await loadMockData();
+        setupEventListeners();
+        updateDateTime();
+    } catch (error) {
+        console.error('App initialization error:', error);
+        throw error;
+    }
 }
 
 // Check if user is logged in
@@ -29,6 +136,80 @@ function checkAuthStatus() {
         console.info('VERIFY: No user logged in, showing auth section');
         showSection('auth');
     }
+}
+
+// SOS Modal Functions
+async function setupSOSModal() {
+    // Load emergency contacts from UI config
+    try {
+        const response = await fetch('data/ui-config.json');
+        const config = await response.json();
+        const contacts = config.emergency.contacts;
+        
+        const sosContactsList = document.getElementById('sosContactsList');
+        sosContactsList.innerHTML = contacts.map(contact => `
+            <div class="emergency-contact">
+                <h3>${contact.name}</h3>
+                <p class="contact-description">${contact.description}</p>
+                <a href="tel:${contact.number}" class="emergency-phone">
+                    <i class="fas fa-phone"></i> ${contact.number}
+                </a>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading emergency contacts:', error);
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('sosModal');
+        if (event.target == modal) {
+            closeSOSModal();
+        }
+    }
+}
+
+function openSOS() {
+    const modal = document.getElementById('sosModal');
+    modal.style.display = 'flex';
+    // Start calming breathing exercise automatically
+    startSOSBreathing();
+}
+
+function closeSOSModal() {
+    const modal = document.getElementById('sosModal');
+    modal.style.display = 'none';
+    // Stop breathing exercise
+    if (sosBreathingInterval) {
+        clearInterval(sosBreathingInterval);
+    }
+}
+
+function startSOSBreathing() {
+    const breathingGuide = document.getElementById('sosBreathingGuide');
+    let phase = 'inhale';
+    let count = 4;
+
+    breathingGuide.textContent = 'Inhale slowly...';
+    
+    sosBreathingInterval = setInterval(() => {
+        count--;
+        
+        if (count === 0) {
+            if (phase === 'inhale') {
+                phase = 'hold';
+                count = 7;
+                breathingGuide.textContent = 'Hold...';
+            } else if (phase === 'hold') {
+                phase = 'exhale';
+                count = 8;
+                breathingGuide.textContent = 'Exhale slowly...';
+            } else {
+                phase = 'inhale';
+                count = 4;
+                breathingGuide.textContent = 'Inhale slowly...';
+            }
+        }
+    }, 1000);
 }
 
 // Show specific section
@@ -46,17 +227,54 @@ function showSection(sectionName) {
         targetSection.classList.add('active');
     }
 
-    // Update navigation visibility and admin button
+    // Update navigation visibility based on user role
     const nav = document.getElementById('mainNav');
     if (sectionName === 'auth') {
         nav.style.display = 'none';
     } else {
         nav.style.display = 'flex';
-        // Show/hide admin button based on user role
+        
+        // Configure navigation based on user role
         const adminBtn = document.getElementById('adminNavBtn');
-        if (adminBtn && currentUser) {
-            adminBtn.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
-            console.info(`VERIFY: Admin nav button ${currentUser.role === 'admin' ? 'shown' : 'hidden'} for role: ${currentUser.role}`);
+        const bookingsBtn = document.querySelector('.nav-btn[onclick="showSection(\'bookings\')"]');
+        const reportsBtn = document.querySelector('.nav-btn[onclick="showSection(\'reports\')"]');
+        const assessmentBtn = document.querySelector('.nav-btn[onclick="showSection(\'assessment\')"]');
+        const wellnessBtn = document.querySelector('.nav-btn[onclick="showSection(\'wellness\')"]');
+
+        if (currentUser) {
+            switch(currentUser.role) {
+                case 'admin':
+                    // Admin can access everything
+                    adminBtn.style.display = 'inline-block';
+                    bookingsBtn.style.display = 'inline-block';
+                    reportsBtn.style.display = 'inline-block';
+                    assessmentBtn.style.display = 'inline-block';
+                    wellnessBtn.style.display = 'inline-block';
+                    loadAdminDashboard(); // Load admin specific dashboard
+                    break;
+                case 'counsellor':
+                    // Counsellors can only see their appointments and patient reports
+                    adminBtn.style.display = 'none';
+                    bookingsBtn.textContent = '📅 My Appointments';
+                    bookingsBtn.style.display = 'inline-block';
+                    reportsBtn.textContent = '📊 Patient Reports';
+                    reportsBtn.style.display = 'inline-block';
+                    assessmentBtn.style.display = 'none';
+                    wellnessBtn.style.display = 'none';
+                    loadCounsellorDashboard(); // Load counsellor specific dashboard
+                    break;
+                case 'student':
+                    // Students can access wellness, bookings, and assessments
+                    adminBtn.style.display = 'none';
+                    bookingsBtn.textContent = '📅 Book Session';
+                    bookingsBtn.style.display = 'inline-block';
+                    reportsBtn.textContent = '📊 My Progress';
+                    reportsBtn.style.display = 'inline-block';
+                    assessmentBtn.style.display = 'inline-block';
+                    wellnessBtn.style.display = 'inline-block';
+                    loadStudentDashboard(); // Load student specific dashboard
+                    break;
+            }
         }
     }
 
@@ -89,93 +307,476 @@ function showSection(sectionName) {
 function setupEventListeners() {
     // Auth form submission
     const authForm = document.getElementById('authForm');
-    authForm.addEventListener('submit', handleAuth);
+    if (authForm) {
+        authForm.addEventListener('submit', handleAuth);
+    }
 
     // Assessment form submission
     const assessmentForm = document.getElementById('assessmentForm');
-    assessmentForm.addEventListener('submit', handleAssessment);
+    if (assessmentForm) {
+        assessmentForm.addEventListener('submit', handleAssessment);
+    }
+}
+
+// Authentication Handler
+function handleAuth(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const isLogin = document.getElementById('isLogin').checked;
+
+    showLoading('authForm');
+
+    // Use our safeFetch utility
+    safeFetch('data/users.json')
+        .then(users => {
+            const user = users.find(u => u.email === email);
+            
+            if (isLogin) {
+                if (user && user.password === password) {
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    showDashboard();
+                } else {
+                    throw new Error('Invalid credentials');
+                }
+            } else {
+                if (user) {
+                    throw new Error('User already exists');
+                } else {
+                    const newUser = { email, password, role: 'student' };
+                    users.push(newUser);
+                    currentUser = newUser;
+                    localStorage.setItem('currentUser', JSON.stringify(newUser));
+                    showDashboard();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Authentication error:', error);
+            showError('authForm', error);
+        })
+        .finally(() => {
+            hideLoading('authForm');
+        });
+
+        if (isLogin) {
+            if (user && user.password === password) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showDashboard();
+            } else {
+                alert('Invalid credentials');
+            }
+        } else {
+            if (user) {
+                alert('User already exists');
+            } else {
+                const newUser = { email, password, role: 'student' };
+                // In a real app, this would be an API call
+                users.push(newUser);
+                currentUser = newUser;
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                showDashboard();
+            }
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        alert('An error occurred during authentication');
+    }
+}
+
+// Handle Assessment Form
+async function handleAssessment(e) {
+    e.preventDefault();
+    try {
+        const answers = new FormData(e.target);
+        const score = calculateAssessmentScore(answers);
+        await saveAssessmentResult(score);
+        showAssessmentResult(score);
+    } catch (error) {
+        console.error('Assessment error:', error);
+        alert('An error occurred while processing your assessment');
+    }
+}
+
+// Wellness Activity Handlers
+function startBreathingExercise(exerciseId) {
+    // Clear any existing intervals
+    if (breathingInterval) {
+        clearInterval(breathingInterval);
+    }
+
+    fetch('data/wellness.json')
+        .then(response => response.json())
+        .then(data => {
+            const exercise = data.breathing_exercises.find(ex => ex.id === parseInt(exerciseId));
+            if (!exercise) return;
+
+            const guideElement = document.getElementById('breathingGuide');
+            if (!guideElement) return;
+
+            let secondsLeft = exercise.duration;
+            const updateGuide = () => {
+                if (secondsLeft <= 0) {
+                    clearInterval(breathingInterval);
+                    guideElement.textContent = 'Exercise Complete!';
+                    return;
+                }
+                guideElement.textContent = `${exercise.name}: ${exercise.description} (${secondsLeft}s)`;
+                secondsLeft--;
+            };
+            
+            updateGuide();
+            breathingInterval = setInterval(updateGuide, 1000);
+        });
+}
+
+let currentAudio = null;
+function playMusic(trackId) {
+    fetch('data/wellness.json')
+        .then(response => response.json())
+        .then(data => {
+            const track = data.music_suggestions.find(t => t.id === parseInt(trackId));
+            if (!track) return;
+            
+            // Stop any currently playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+
+            // In a real app, you would stream the actual audio file
+            // Here we'll just simulate with a placeholder audio
+            const audio = new Audio('assets/music/' + track.title.toLowerCase().replace(/ /g, '_') + '.mp3');
+            audio.play().catch(e => console.log('Audio playback error:', e));
+            currentAudio = audio;
+        });
+}
+
+function startJournaling(promptId) {
+    fetch('data/wellness.json')
+        .then(response => response.json())
+        .then(data => {
+            const prompt = data.journal_prompts.find(p => p.id === parseInt(promptId));
+            if (!prompt) return;
+
+            const journalArea = document.getElementById('journalArea');
+            if (journalArea) {
+                journalArea.style.display = 'block';
+                document.getElementById('journalPrompt').textContent = prompt.prompt;
+                document.getElementById('journalEntry').value = '';
+                document.getElementById('journalEntry').focus();
+            }
+        });
+}
+
+function saveJournalEntry() {
+    const entry = document.getElementById('journalEntry').value;
+    if (entry.trim()) {
+        // In a real app, save to backend
+        alert('Journal entry saved successfully!');
+        document.getElementById('journalArea').style.display = 'none';
+    }
+}
+
+function startActivity(activityId) {
+    fetch('data/wellness.json')
+        .then(response => response.json())
+        .then(data => {
+            const activity = data.mindfulness_activities.find(a => a.id === parseInt(activityId));
+            if (!activity) return;
+
+            const activityGuide = document.getElementById('activityGuide');
+            if (activityGuide) {
+                activityGuide.innerHTML = `
+                    <h3>${activity.name}</h3>
+                    <p>${activity.description}</p>
+                    <div class="steps">
+                        ${activity.instructions.map((step, index) => 
+                            `<p class="step ${index === 0 ? 'active' : ''}">${index + 1}. ${step}</p>`
+                        ).join('')}
+                    </div>
+                    <div class="timer">${Math.floor(activity.duration / 60)}:00</div>
+                `;
+                activityGuide.style.display = 'block';
+                startActivityTimer(activity.duration);
+            }
+        });
+}
+
+function startActivityTimer(duration) {
+    let timeLeft = duration;
+    const timerElement = document.querySelector('#activityGuide .timer');
+    if (!timerElement) return;
+
+    const updateTimer = () => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(activityInterval);
+            timerElement.textContent = 'Activity Complete!';
+            return;
+        }
+        timeLeft--;
+    };
+
+    updateTimer();
+    const activityInterval = setInterval(updateTimer, 1000);
+}
+
+// Load admin statistics
+function loadAdminStats() {
+    // Simulate loading admin statistics
+    setTimeout(() => {
+        document.getElementById('totalStudents').textContent = '250+';
+        document.getElementById('activeCounsellors').textContent = '5';
+        document.getElementById('todaySessions').textContent = '15';
+        document.getElementById('emergencyCases').textContent = '2';
+        
+        // Load recent activities
+        const activities = [
+            'New counsellor registration: Dr. Karthikeyan V.',
+            'Emergency case resolved: Student ID #1234',
+            'New student registration: 5 students',
+            'Booking completed: Session ID #789'
+        ];
+        
+        const recentActivities = document.getElementById('recentActivities');
+        recentActivities.innerHTML = activities.map(activity => 
+            `<div class="activity-item">${activity}</div>`
+        ).join('');
+    }, 1000);
+}
+
+// Load counsellor data
+async function loadCounsellorData() {
+    try {
+        // Load counsellors from JSON
+        const response = await fetch('data/counsellors.json');
+        const counsellors = await response.json();
+        
+        // Get today's day name
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const today = days[new Date().getDay()];
+        
+        // Filter available slots for today
+        const availableCounsellors = counsellors.filter(counsellor => 
+            counsellor.availability.some(schedule => 
+                schedule.day === today || schedule.day === 'Daily'
+            )
+        );
+
+        // Update the counsellors list
+        const counsellorsList = document.getElementById('counsellorsList');
+        if (counsellorsList) {
+            counsellorsList.innerHTML = availableCounsellors.map(counsellor => `
+                <div class="counsellor-card">
+                    <div class="counsellor-header">
+                        <span class="avatar">${counsellor.avatar}</span>
+                        <div class="counsellor-info">
+                            <h3>${counsellor.name}</h3>
+                            <p class="specialty">${counsellor.specialty}</p>
+                        </div>
+                    </div>
+                    <div class="counsellor-details">
+                        <p class="institution">${counsellor.institution}</p>
+                        <p class="experience">Experience: ${counsellor.experience}</p>
+                        <p class="languages">Languages: ${counsellor.languages.join(', ')}</p>
+                        <p class="rating">Rating: ${'⭐'.repeat(Math.round(counsellor.rating))} (${counsellor.totalSessions} sessions)</p>
+                        <p class="bio">${counsellor.bio}</p>
+                    </div>
+                    <div class="availability">
+                        <h4>Available Slots Today:</h4>
+                        <div class="slots">
+                            ${counsellor.availability
+                                .filter(schedule => schedule.day === today || schedule.day === 'Daily')
+                                .map(schedule => schedule.slots.map(slot => 
+                                    `<button class="slot-btn" onclick="bookSession('${counsellor.id}', '${slot}')">
+                                        ${slot}
+                                    </button>`
+                                ).join(''))}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // If viewing as counsellor, load their appointments
+        if (currentUser && currentUser.role === 'counsellor') {
+            const todayAppointments = document.getElementById('todayAppointments');
+    todayAppointments.innerHTML = appointments.map(apt => `
+        <div class="appointment-item">
+            <div class="apt-time">${apt.time}</div>
+            <div class="apt-details">
+                <strong>${apt.student}</strong>
+                <span class="apt-type">${apt.type}</span>
+                <span class="apt-status ${apt.status.toLowerCase()}">${apt.status}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    // Load patient statistics
+    document.getElementById('totalPatients').textContent = '45';
+    document.getElementById('activeCases').textContent = '28';
+    document.getElementById('criticalCases').textContent = '3';
+    
+    // Load urgent notifications
+    const notifications = [
+        'Student Ravi K. reported high stress levels',
+        'Follow-up required: Priya M. - Last session'
+    ];
+    
+    const urgentNotifications = document.getElementById('urgentNotifications');
+    urgentNotifications.innerHTML = notifications.map(note => 
+        `<div class="notification-item urgent">${note}</div>`
+    ).join('');
+}
+
+// Load student data
+function loadStudentData() {
+    // Load next session details
+    const nextSession = {
+        date: '2025-09-15',
+        time: '10:00 AM',
+        counsellor: 'Dr. Lakshmi Priya',
+        type: 'Regular Session'
+    };
+    
+    const nextSessionElement = document.getElementById('nextSession');
+    nextSessionElement.innerHTML = `
+        <div class="session-details">
+            <p><strong>Date:</strong> ${nextSession.date}</p>
+            <p><strong>Time:</strong> ${nextSession.time}</p>
+            <p><strong>Counsellor:</strong> ${nextSession.counsellor}</p>
+            <p><strong>Type:</strong> ${nextSession.type}</p>
+        </div>
+        <button class="btn btn-secondary" onclick="rescheduleSession()">Reschedule</button>
+    `;
+    
+    // Load wellness score and activities
+    document.getElementById('wellnessScore').textContent = '85/100 �';
+    document.getElementById('activitiesCount').textContent = '12 this week';
+}
+
+// Handle different authentication errors separately
+function handleAuthError(error, mode) {
+    let message = '';
+    switch(error) {
+        case 'invalid_credentials':
+            message = 'Invalid email or password! Please try again.';
+            break;
+        case 'role_mismatch':
+            message = 'Access denied for this role!';
+            break;
+        case 'account_locked':
+            message = 'Your account has been locked. Please contact support.';
+            break;
+        default:
+            message = 'An error occurred. Please try again later.';
+    }
+    showNotification(message, 'error');
+}
 }
 
 // Authentication handling
 function handleAuth(e) {
     e.preventDefault();
     
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
+    let formEmail = document.getElementById('email').value;
+    let formPassword = document.getElementById('password').value;
+    let formRole = document.getElementById('role').value;
 
     if (isLoginMode) {
         // Login logic
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
-        
-        if (user) {
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            showDashboard();
-            showNotification('Welcome back! 🎉', 'success');
-        } else {
-            showNotification('Invalid credentials! 😔', 'error');
-        }
+        handleLogin(formEmail, formPassword, formRole);
     } else {
         // Signup logic
-        if (!role) {
-            showNotification('Please select a role! 📝', 'warning');
-            return;
-        }
-        
-        // Prevent admin self-signup for security
-        if (role === 'admin') {
-            showNotification('Admin accounts must be created by system administrators! 🚫', 'error');
-            return;
-        }
-        
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            showNotification('Please enter a valid email address! 📧', 'error');
-            return;
-        }
-        
-        // Basic password validation
-        if (password.length < 6) {
-            showNotification('Password must be at least 6 characters long! 🔒', 'error');
-            return;
-        }
-
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const existingUser = users.find(u => u.email === email);
-        
-        if (existingUser) {
-            showNotification('User already exists! Please login instead. 🙋‍♂️', 'warning');
-        } else {
-            const newUser = {
-                id: Date.now(),
-                email,
-                password, // In a real app, this should be hashed
-                role,
-                name: email.split('@')[0], // Use email prefix as default name
-                joinDate: new Date().toISOString(),
-                streak: 0,
-                points: 0,
-                badges: [],
-                lastMoodCheck: null
-            };
-            
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            
-            // Award welcome badge
-            awardBadge('welcome', '🎉 Welcome', 'Joined DigiMind community!', '🎉');
-            
-            showDashboard();
-            showNotification('Account created successfully! Welcome to DigiMind! 🎊', 'success');
-            createConfetti();
-        }
+        handleSignup(formEmail, formPassword, formRole);
     }
+}
+
+// Handle Login
+function handleLogin(email, password, role) {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        showDashboard();
+        showNotification('Welcome back! 🎉', 'success');
+    } else {
+        handleAuthError('invalid_credentials', 'login');
+    }
+}
+
+// Handle Signup
+function handleSignup(email, password, role) {
+    // Basic validations
+    if (!role) {
+        showNotification('Please select a role! 📝', 'warning');
+        return;
+    }
+    
+    // Prevent admin self-signup for security
+    if (role === 'admin') {
+        handleAuthError('role_mismatch', 'signup');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address! 📧', 'error');
+        return;
+    }
+    
+    // Password validation
+    if (password.length < 6) {
+        showNotification('Password must be at least 6 characters long! 🔒', 'error');
+        return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+        showNotification('User already exists! Please login instead. 🙋‍♂️', 'warning');
+    } else {
+        const newUser = {
+            id: Date.now(),
+            email,
+            password, // In a real app, this should be hashed
+            role,
+            name: email.split('@')[0],
+            joinDate: new Date().toISOString(),
+            streak: 0,
+            points: 0,
+            badges: [],
+            lastMoodCheck: null,
+            preferences: {
+                theme: 'light',
+                notifications: true,
+                language: 'en'
+            }
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        currentUser = newUser;
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        
+        // Award welcome badge
+        awardBadge('welcome', '🎉 Welcome', 'Joined DigiMind community!', '🎉');
+        
+        showDashboard();
+        showNotification('Account created successfully! Welcome to DigiMind! 🎊', 'success');
+        createConfetti();
+    }
+}
 }
 
 // Toggle between login and signup
@@ -208,22 +809,164 @@ function showDashboard() {
     }
 }
 
-// Load dashboard data
+// Load dashboard data based on user role
 function loadDashboard() {
     console.info(`VERIFY: Loading dashboard for ${currentUser.email} (${currentUser.role})`);
-    const welcomeMessage = document.getElementById('welcomeMessage');
-    const streakCounter = document.getElementById('streakCounter');
-    const badgesContainer = document.getElementById('badgesContainer');
     
-    welcomeMessage.textContent = `Welcome back, ${currentUser.email.split('@')[0]}! 🌈`;
-    streakCounter.textContent = `Daily streak: ${currentUser.streak} days 🔥`;
-    console.info(`VERIFY: Dashboard loaded - streak: ${currentUser.streak}, badges: ${currentUser.badges ? currentUser.badges.length : 0}`);
-    
-    // Load badges
-    loadBadges();
-    
-    // Check if mood was checked today
+    switch(currentUser.role) {
+        case 'admin':
+            loadAdminDashboard();
+            break;
+        case 'counsellor':
+            loadCounsellorDashboard();
+            break;
+        case 'student':
+            loadStudentDashboard();
+            break;
+    }
+}
+
+// Admin Dashboard
+function loadAdminDashboard() {
+    const dashboardContent = document.querySelector('.dashboard-content');
+    dashboardContent.innerHTML = `
+        <div class="admin-dashboard">
+            <div class="card stats-card">
+                <h3>System Statistics 📊</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h4>Total Students</h4>
+                        <p id="totalStudents">Loading...</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Active Counsellors</h4>
+                        <p id="activeCounsellors">Loading...</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Sessions Today</h4>
+                        <p id="todaySessions">Loading...</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Emergency Cases</h4>
+                        <p id="emergencyCases">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card quick-actions">
+                <h3>Quick Actions ⚡</h3>
+                <div class="action-buttons">
+                    <button onclick="showAdminSection('addCounsellor')" class="btn btn-primary">➕ Add Counsellor</button>
+                    <button onclick="showAdminSection('manageBookings')" class="btn btn-primary">📅 Manage Bookings</button>
+                    <button onclick="showAdminSection('reports')" class="btn btn-primary">📊 View Reports</button>
+                    <button onclick="showAdminSection('emergencyList')" class="btn btn-warning">🚨 Emergency List</button>
+                </div>
+            </div>
+
+            <div class="card recent-activities">
+                <h3>Recent Activities 🕒</h3>
+                <div id="recentActivities" class="activity-list">
+                    Loading activities...
+                </div>
+            </div>
+        </div>
+    `;
+    loadAdminStats();
+}
+
+// Counsellor Dashboard
+function loadCounsellorDashboard() {
+    const dashboardContent = document.querySelector('.dashboard-content');
+    dashboardContent.innerHTML = `
+        <div class="counsellor-dashboard">
+            <div class="card appointments-card">
+                <h3>Today's Appointments 📅</h3>
+                <div id="todayAppointments" class="appointments-list">
+                    Loading appointments...
+                </div>
+            </div>
+
+            <div class="card patients-card">
+                <h3>My Patients Overview 👥</h3>
+                <div class="patients-grid">
+                    <div class="stat-item">
+                        <h4>Total Patients</h4>
+                        <p id="totalPatients">Loading...</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Active Cases</h4>
+                        <p id="activeCases">Loading...</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Critical Cases</h4>
+                        <p id="criticalCases">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card urgent-notifications">
+                <h3>Urgent Notifications �</h3>
+                <div id="urgentNotifications" class="notification-list">
+                    Loading notifications...
+                </div>
+            </div>
+        </div>
+    `;
+    loadCounsellorData();
+}
+
+// Student Dashboard
+function loadStudentDashboard() {
+    const dashboardContent = document.querySelector('.dashboard-content');
+    dashboardContent.innerHTML = `
+        <div class="student-dashboard">
+            <div class="card mood-card">
+                <h3>How are you feeling today? 😊</h3>
+                <div class="mood-selector" id="moodSelector">
+                    <button class="mood-btn" onclick="selectMood('happy')" data-mood="happy">😃</button>
+                    <button class="mood-btn" onclick="selectMood('neutral')" data-mood="neutral">😐</button>
+                    <button class="mood-btn" onclick="selectMood('sad')" data-mood="sad">😢</button>
+                    <button class="mood-btn" onclick="selectMood('angry')" data-mood="angry">😡</button>
+                </div>
+                <p id="moodStatus"></p>
+            </div>
+
+            <div class="card next-session">
+                <h3>Your Next Session 📅</h3>
+                <div id="nextSession" class="session-info">
+                    Loading your next session...
+                </div>
+            </div>
+
+            <div class="card wellness-progress">
+                <h3>Your Wellness Journey 🌱</h3>
+                <div class="progress-grid">
+                    <div class="progress-item">
+                        <h4>Mood Streak</h4>
+                        <p id="streakCounter">0 days 🔥</p>
+                    </div>
+                    <div class="progress-item">
+                        <h4>Wellness Score</h4>
+                        <p id="wellnessScore">Loading...</p>
+                    </div>
+                    <div class="progress-item">
+                        <h4>Activities Done</h4>
+                        <p id="activitiesCount">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card badges-section">
+                <h3>Your Achievements 🏆</h3>
+                <div id="badgesContainer" class="badges-grid">
+                    Loading badges...
+                </div>
+            </div>
+        </div>
+    `;
+    loadStudentData();
     checkDailyMoodStatus();
+    loadBadges();
 }
 
 // Check daily mood status
