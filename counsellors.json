@@ -1,12 +1,13 @@
 [
   {
     "id": 1,
-    "name": "Dr. Sarah Johnson",
-    "email": "sarah.johnson@digimind.com",
+    "name": "Dr. Ramachandran Subramanian",
+    "email": "rama.subramanian@digimind.com",
     "specialty": "Anxiety & Depression",
-    "experience": "8 years",
-    "avatar": "👩‍⚕️",
-    "bio": "Dr. Johnson specializes in cognitive behavioral therapy and has helped hundreds of students overcome anxiety and depression.",
+    "experience": "12 years",
+    "avatar": "👨‍⚕️",
+    "bio": "Dr. Ramachandran specializes in cognitive behavioral therapy with expertise in student counseling at PSG College of Technology, Coimbatore.",
+    "languages": ["Tamil", "English"],
     "availability": [
       {
         "day": "Monday",
@@ -22,16 +23,20 @@
       }
     ],
     "rating": 4.9,
-    "totalSessions": 145
+    "totalSessions": 245,
+    "location": "Coimbatore",
+    "institution": "PSG College of Technology",
+    "fees": "Free for students"
   },
   {
     "id": 2,
-    "name": "Dr. Michael Chen",
-    "email": "michael.chen@digimind.com",
+    "name": "Dr. Lakshmi Priya",
+    "email": "lakshmi.priya@digimind.com",
     "specialty": "Stress Management",
-    "experience": "12 years",
-    "avatar": "👨‍⚕️",
-    "bio": "Dr. Chen focuses on mindfulness-based stress reduction and has extensive experience in helping students manage academic pressure.",
+    "experience": "10 years",
+    "avatar": "👩‍⚕️",
+    "bio": "Dr. Lakshmi focuses on academic stress management and mindfulness at Kumaraguru College of Technology, Coimbatore.",
+    "languages": ["Tamil", "English", "Malayalam"],
     "availability": [
       {
         "day": "Tuesday",
@@ -47,41 +52,49 @@
       }
     ],
     "rating": 4.8,
-    "totalSessions": 203
+    "totalSessions": 183,
+    "location": "Coimbatore",
+    "institution": "Kumaraguru College of Technology",
+    "fees": "Free for students"
   },
   {
     "id": 3,
-    "name": "Dr. Emily Davis",
-    "email": "emily.davis@digimind.com",
+    "name": "Dr. Senthil Kumar",
+    "email": "senthil.kumar@digimind.com",
     "specialty": "Student Counseling",
-    "experience": "6 years",
-    "avatar": "👩‍🏫",
-    "bio": "Dr. Davis specializes in academic stress, social anxiety, and transition issues common among students.",
+    "experience": "15 years",
+    "avatar": "👨‍🏫",
+    "bio": "Dr. Senthil specializes in academic performance anxiety and career counseling at Coimbatore Institute of Technology.",
+    "languages": ["Tamil", "English"],
     "availability": [
       {
         "day": "Monday",
         "slots": ["10:00", "12:00", "15:00"]
       },
       {
-        "day": "Tuesday",
+        "day": "Wednesday",
         "slots": ["09:00", "11:00", "14:00", "16:00"]
       },
       {
-        "day": "Thursday",
+        "day": "Friday",
         "slots": ["08:00", "10:00", "13:00"]
       }
     ],
-    "rating": 4.7,
-    "totalSessions": 98
+    "rating": 4.9,
+    "totalSessions": 278,
+    "location": "Coimbatore",
+    "institution": "Coimbatore Institute of Technology",
+    "fees": "Free for students"
   },
   {
     "id": 4,
-    "name": "Dr. James Wilson",
-    "email": "james.wilson@digimind.com",
+    "name": "Dr. Meenakshi Sundaram",
+    "email": "meenakshi.s@digimind.com",
     "specialty": "Crisis Intervention",
-    "experience": "15 years",
+    "experience": "18 years",
     "avatar": "👨‍💼",
-    "bio": "Dr. Wilson provides emergency support and crisis intervention services, available for urgent mental health needs.",
+    "bio": "Dr. Meenakshi provides emergency support and crisis intervention services at Sri Ramakrishna Hospital, Coimbatore.",
+    "languages": ["Tamil", "English", "Telugu"],
     "availability": [
       {
         "day": "Daily",
@@ -89,6 +102,183 @@
       }
     ],
     "rating": 4.9,
-    "totalSessions": 276
+    "totalSessions": 326,
+    "location": "Coimbatore",
+    "institution": "Sri Ramakrishna Hospital",
+    "fees": "Free for emergency cases"
+  },
+  {
+    "id": 5,
+    "name": "Dr. Karthikeyan Vasudevan",
+    "email": "karthikeyan.v@digimind.com",
+    "specialty": "Behavioral Therapy",
+    "experience": "8 years",
+    "avatar": "👨‍⚕️",
+    "bio": "Dr. Karthikeyan specializes in behavioral therapy and student mental health at SNS College of Technology, Coimbatore.",
+    "languages": ["Tamil", "English"],
+    "availability": [
+      {
+        "day": "Tuesday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Thursday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Saturday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.7,
+    "totalSessions": 156,
+    "location": "Coimbatore",
+    "institution": "SNS College of Technology",
+    "fees": "Free for students"
+  },
+  {
+    "id": 6,
+    "name": "Dr. Santhoshi Balakrishnan",
+    "email": "santhoshi.b@digimind.com",
+    "specialty": "Adolescent Psychology",
+    "experience": "9 years",
+    "avatar": "👩‍⚕️",
+    "bio": "Dr. Santhoshi specializes in adolescent psychology and student counseling at Sri Krishna College of Engineering and Technology.",
+    "languages": ["Tamil", "English"],
+    "availability": [
+      {
+        "day": "Monday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Wednesday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Friday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.8,
+    "totalSessions": 189,
+    "location": "Coimbatore",
+    "institution": "Sri Krishna College of Engineering and Technology",
+    "fees": "Free for students"
+  },
+  {
+    "id": 7,
+    "name": "Dr. Arun Kumar Rajendran",
+    "email": "arunkumar.r@digimind.com",
+    "specialty": "Educational Psychology",
+    "experience": "11 years",
+    "avatar": "👨‍⚕️",
+    "bio": "Dr. Arun Kumar specializes in educational psychology and learning disabilities at Government College of Technology, Coimbatore.",
+    "languages": ["Tamil", "English", "Malayalam"],
+    "availability": [
+      {
+        "day": "Tuesday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Thursday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Saturday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.9,
+    "totalSessions": 234,
+    "location": "Coimbatore",
+    "institution": "Government College of Technology",
+    "fees": "Free for students"
+  },
+  {
+    "id": 8,
+    "name": "Dr. Vijayalakshmi Murugesan",
+    "email": "vijayalakshmi.m@digimind.com",
+    "specialty": "Family Counseling",
+    "experience": "14 years",
+    "avatar": "👩‍⚕️",
+    "bio": "Dr. Vijayalakshmi specializes in family counseling and relationship issues at Hindusthan College of Engineering and Technology.",
+    "languages": ["Tamil", "English"],
+    "availability": [
+      {
+        "day": "Monday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Wednesday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Friday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.8,
+    "totalSessions": 267,
+    "location": "Coimbatore",
+    "institution": "Hindusthan College of Engineering and Technology",
+    "fees": "Free for students"
+  },
+  {
+    "id": 9,
+    "name": "Dr. Kannan Palaniswamy",
+    "email": "kannan.p@digimind.com",
+    "specialty": "Addiction Counseling",
+    "experience": "16 years",
+    "avatar": "👨‍⚕️",
+    "bio": "Dr. Kannan specializes in addiction counseling and substance abuse at KPR Institute of Engineering and Technology.",
+    "languages": ["Tamil", "English"],
+    "availability": [
+      {
+        "day": "Tuesday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Thursday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Saturday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.9,
+    "totalSessions": 312,
+    "location": "Coimbatore",
+    "institution": "KPR Institute of Engineering and Technology",
+    "fees": "Free for students"
+  },
+  {
+    "id": 10,
+    "name": "Dr. Kavitha Ramasamy",
+    "email": "kavitha.r@digimind.com",
+    "specialty": "Career Counseling",
+    "experience": "13 years",
+    "avatar": "👩‍⚕️",
+    "bio": "Dr. Kavitha specializes in career counseling and professional development at Sri Eshwar College of Engineering.",
+    "languages": ["Tamil", "English", "Hindi"],
+    "availability": [
+      {
+        "day": "Monday",
+        "slots": ["09:00", "11:00", "14:00", "16:00"]
+      },
+      {
+        "day": "Wednesday",
+        "slots": ["10:00", "13:00", "15:00"]
+      },
+      {
+        "day": "Friday",
+        "slots": ["09:00", "11:00", "14:00"]
+      }
+    ],
+    "rating": 4.8,
+    "totalSessions": 245,
+    "location": "Coimbatore",
+    "institution": "Sri Eshwar College of Engineering",
+    "fees": "Free for students"
   }
 ]
