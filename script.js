@@ -4,159 +4,6 @@ let currentUser = null;
 let isLoginMode = true;
 let breathingInterval = null;
 let sosBreathingInterval = null;
-let uiConfig = null;
-
-// Load UI Configuration
-async function loadUIConfig() {
-    try {
-        const response = await fetch('data/ui-config.json');
-        uiConfig = await response.json();
-    } catch (error) {
-        console.error('Error loading UI config:', error);
-    }
-}
-
-// Counsellor Management Functions
-function openAddCounsellorModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>Add New Counsellor</h3>
-            <form id="addCounsellorForm">
-                <div class="form-group">
-                    <input type="text" id="counsellorName" placeholder="Full Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="counsellorEmail" placeholder="Email" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" id="counsellorPhone" placeholder="Phone Number" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorSpecialization" placeholder="Specialization" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorLanguages" placeholder="Languages (comma separated)" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorExperience" placeholder="Years of Experience" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Counsellor</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById('addCounsellorForm').addEventListener('submit', handleAddCounsellor);
-}
-
-function handleAddCounsellor(e) {
-    e.preventDefault();
-    const newCounsellor = {
-        id: 'c' + Date.now(),
-        name: document.getElementById('counsellorName').value,
-        email: document.getElementById('counsellorEmail').value,
-        phone: document.getElementById('counsellorPhone').value,
-        specialization: document.getElementById('counsellorSpecialization').value,
-        languages: document.getElementById('counsellorLanguages').value.split(',').map(lang => lang.trim()),
-        experience: document.getElementById('counsellorExperience').value,
-        location: 'Coimbatore',
-        available: true
-    };
-
-    // In a real application, this would be an API call
-    let counsellors = JSON.parse(localStorage.getItem('counsellors') || '{"counsellors": []}');
-    counsellors.counsellors.push(newCounsellor);
-    localStorage.setItem('counsellors', JSON.stringify(counsellors));
-
-    closeModal();
-    loadCounsellorManagement();
-}
-
-function editCounsellor(counsellorId) {
-    const counsellors = JSON.parse(localStorage.getItem('counsellors') || '{"counsellors": []}');
-    const counsellor = counsellors.counsellors.find(c => c.id === counsellorId);
-    
-    if (!counsellor) return;
-
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h3>Edit Counsellor</h3>
-            <form id="editCounsellorForm">
-                <input type="hidden" id="counsellorId" value="${counsellor.id}">
-                <div class="form-group">
-                    <input type="text" id="counsellorName" value="${counsellor.name}" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="counsellorEmail" value="${counsellor.email}" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" id="counsellorPhone" value="${counsellor.phone}" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorSpecialization" value="${counsellor.specialization}" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorLanguages" value="${counsellor.languages.join(', ')}" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="counsellorExperience" value="${counsellor.experience}" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Update Counsellor</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById('editCounsellorForm').addEventListener('submit', handleEditCounsellor);
-}
-
-function handleEditCounsellor(e) {
-    e.preventDefault();
-    const counsellorId = document.getElementById('counsellorId').value;
-    const updatedCounsellor = {
-        id: counsellorId,
-        name: document.getElementById('counsellorName').value,
-        email: document.getElementById('counsellorEmail').value,
-        phone: document.getElementById('counsellorPhone').value,
-        specialization: document.getElementById('counsellorSpecialization').value,
-        languages: document.getElementById('counsellorLanguages').value.split(',').map(lang => lang.trim()),
-        experience: document.getElementById('counsellorExperience').value,
-        location: 'Coimbatore',
-        available: true
-    };
-
-    let counsellors = JSON.parse(localStorage.getItem('counsellors') || '{"counsellors": []}');
-    const index = counsellors.counsellors.findIndex(c => c.id === counsellorId);
-    if (index !== -1) {
-        counsellors.counsellors[index] = updatedCounsellor;
-        localStorage.setItem('counsellors', JSON.stringify(counsellors));
-    }
-
-    closeModal();
-    loadCounsellorManagement();
-}
-
-function deleteCounsellor(counsellorId) {
-    if (confirm('Are you sure you want to delete this counsellor?')) {
-        let counsellors = JSON.parse(localStorage.getItem('counsellors') || '{"counsellors": []}');
-        counsellors.counsellors = counsellors.counsellors.filter(c => c.id !== counsellorId);
-        localStorage.setItem('counsellors', JSON.stringify(counsellors));
-        loadCounsellorManagement();
-    }
-}
-
-function closeModal() {
-    const modal = document.querySelector('.modal');
-    if (modal) {
-        modal.remove();
-    }
-}
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -164,79 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize the application
-async function initializeApp() {
-    await loadUIConfig();
+function initializeApp() {
     checkAuthStatus();
     loadMockData();
     setupEventListeners();
     updateDateTime();
-}
-
-// Admin Functions
-function loadAdminDashboard() {
-    const adminContent = document.getElementById('adminContent');
-    showAdminTab('counsellors'); // Default tab
-}
-
-function showAdminTab(tab) {
-    const adminContent = document.getElementById('adminContent');
-    const tabButtons = document.querySelectorAll('.admin-nav-btn');
-    
-    // Update active tab button
-    tabButtons.forEach(btn => {
-        btn.classList.remove('active');
-        if(btn.getAttribute('onclick').includes(tab)) {
-            btn.classList.add('active');
-        }
-    });
-
-    switch(tab) {
-        case 'counsellors':
-            loadCounsellorManagement();
-            break;
-        case 'students':
-            loadStudentManagement();
-            break;
-        case 'bookings':
-            loadAllBookings();
-            break;
-        case 'reports':
-            loadSystemReports();
-            break;
-    }
-}
-
-function loadCounsellorManagement() {
-    fetch('data/counsellors.json')
-        .then(response => response.json())
-        .then(data => {
-            const adminContent = document.getElementById('adminContent');
-            adminContent.innerHTML = `
-                <div class="management-section">
-                    <div class="section-header">
-                        <h3>Manage Counsellors</h3>
-                        <button class="btn btn-primary" onclick="openAddCounsellorModal()">Add New Counsellor</button>
-                    </div>
-                    <div class="counsellors-list">
-                        ${data.counsellors.map(counsellor => `
-                            <div class="counsellor-card">
-                                <div class="counsellor-info">
-                                    <h4>${counsellor.name}</h4>
-                                    <p>📍 ${counsellor.location}</p>
-                                    <p>🔬 ${counsellor.specialization}</p>
-                                    <p>🗣️ ${counsellor.languages.join(', ')}</p>
-                                    <p>📞 ${counsellor.phone}</p>
-                                </div>
-                                <div class="counsellor-actions">
-                                    <button class="btn btn-secondary" onclick="editCounsellor('${counsellor.id}')">Edit</button>
-                                    <button class="btn btn-danger" onclick="deleteCounsellor('${counsellor.id}')">Delete</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        });
 }
 
 // Check if user is logged in
@@ -267,40 +46,17 @@ function showSection(sectionName) {
         targetSection.classList.add('active');
     }
 
-    // Update navigation visibility based on user role
+    // Update navigation visibility and admin button
     const nav = document.getElementById('mainNav');
     if (sectionName === 'auth') {
         nav.style.display = 'none';
     } else {
         nav.style.display = 'flex';
-        
-        // Configure navigation based on user role
+        // Show/hide admin button based on user role
         const adminBtn = document.getElementById('adminNavBtn');
-        const bookingsBtn = document.querySelector('.nav-btn[onclick="showSection(\'bookings\')"]');
-        const reportsBtn = document.querySelector('.nav-btn[onclick="showSection(\'reports\')"]');
-        const assessmentBtn = document.querySelector('.nav-btn[onclick="showSection(\'assessment\')"]');
-
-        if (currentUser) {
-            switch(currentUser.role) {
-                case 'admin':
-                    adminBtn.style.display = 'inline-block';
-                    bookingsBtn.style.display = 'inline-block';
-                    reportsBtn.style.display = 'inline-block';
-                    assessmentBtn.style.display = 'inline-block';
-                    break;
-                case 'counsellor':
-                    adminBtn.style.display = 'none';
-                    bookingsBtn.style.display = 'inline-block';
-                    reportsBtn.style.display = 'inline-block';
-                    assessmentBtn.style.display = 'none';
-                    break;
-                case 'student':
-                    adminBtn.style.display = 'none';
-                    bookingsBtn.style.display = 'inline-block';
-                    reportsBtn.style.display = 'inline-block';
-                    assessmentBtn.style.display = 'inline-block';
-                    break;
-            }
+        if (adminBtn && currentUser) {
+            adminBtn.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
+            console.info(`VERIFY: Admin nav button ${currentUser.role === 'admin' ? 'shown' : 'hidden'} for role: ${currentUser.role}`);
         }
     }
 
@@ -338,124 +94,10 @@ function setupEventListeners() {
     // Assessment form submission
     const assessmentForm = document.getElementById('assessmentForm');
     assessmentForm.addEventListener('submit', handleAssessment);
-
-// Role-specific dashboard loaders
-function loadAdminDashboard() {
-    const dashboardContent = document.querySelector('.dashboard-content');
-    dashboardContent.innerHTML = `
-        <div class="admin-controls">
-            <div class="card">
-                <h3>Admin Controls 👨‍💼</h3>
-                <div class="admin-actions">
-                    <button onclick="showAdminSection('counsellors')" class="btn btn-primary">Manage Counsellors</button>
-                    <button onclick="showAdminSection('bookings')" class="btn btn-primary">View All Bookings</button>
-                    <button onclick="showAdminSection('students')" class="btn btn-primary">Manage Students</button>
-                    <button onclick="showAdminSection('reports')" class="btn btn-primary">System Reports</button>
-                </div>
-            </div>
-            <div id="adminSectionContent"></div>
-        </div>
-    `;
-}
-
-function loadCounsellorDashboard() {
-    const dashboardContent = document.querySelector('.dashboard-content');
-    dashboardContent.innerHTML = `
-        <div class="counsellor-dashboard">
-            <div class="card">
-                <h3>Today's Appointments 📅</h3>
-                <div id="todayAppointments" class="appointments-list">
-                    Loading appointments...
-                </div>
-            </div>
-            <div class="card">
-                <h3>Patient Overview 👥</h3>
-                <div id="patientStats" class="patient-stats">
-                    Loading patient statistics...
-                </div>
-            </div>
-        </div>
-    `;
-    loadCounsellorAppointments();
-}
-
-function loadStudentDashboard() {
-    const dashboardContent = document.querySelector('.dashboard-content');
-    dashboardContent.innerHTML = `
-        <div class="student-dashboard">
-            <div class="card mood-card">
-                <h3>How are you feeling today? 😊</h3>
-                <div class="mood-selector" id="moodSelector">
-                    <button class="mood-btn" onclick="selectMood('happy')" data-mood="happy">😃</button>
-                    <button class="mood-btn" onclick="selectMood('neutral')" data-mood="neutral">😐</button>
-                    <button class="mood-btn" onclick="selectMood('sad')" data-mood="sad">😢</button>
-                    <button class="mood-btn" onclick="selectMood('angry')" data-mood="angry">😡</button>
-                </div>
-                <p id="moodStatus"></p>
-            </div>
-            <div class="card">
-                <h3>Next Counselling Session 📅</h3>
-                <div id="nextSession">
-                    Loading your next session...
-                </div>
-            </div>
-            <div class="card">
-                <h3>Wellness Journey 🌱</h3>
-                <div id="wellnessProgress">
-                    Loading your progress...
-                </div>
-            </div>
-        </div>
-    `;
 }
 
 // Authentication handling
 function handleAuth(e) {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
-    
-    // Mock authentication (replace with real authentication in production)
-    if (isLoginMode) {
-        // Login logic
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password && u.role === role);
-        
-        if (user) {
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            console.info(`LOGIN: Success - ${email} (${role})`);
-            showDashboard();
-        } else {
-            alert('Invalid credentials. Please try again.');
-        }
-    } else {
-        // Signup logic
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (users.some(u => u.email === email)) {
-            alert('Email already exists. Please login instead.');
-            return;
-        }
-        
-        const newUser = {
-            id: Date.now().toString(),
-            email,
-            password,
-            role,
-            createdAt: new Date().toISOString()
-        };
-        
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        // Auto login after signup
-        currentUser = newUser;
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-        console.info(`SIGNUP: Success - ${email} (${role})`);
-        showDashboard();
-    }
     e.preventDefault();
     
     const email = document.getElementById('email').value;
